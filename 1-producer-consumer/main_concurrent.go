@@ -15,19 +15,19 @@ import (
 	ms "github.com/go-concurrency-exercises/1-producer-consumer/mockstream"
 )
 
-func producer(stream ms.Stream) (tweets []*ms.Tweet) {
+func producerConc(stream ms.Stream, tweets chan<- *ms.Tweet) {
 	for {
 		tweet, err := stream.Next()
 		if err == ms.ErrEOF {
-			return tweets
+			close(tweets)
+		} else {
+			tweets <- tweet
 		}
-
-		tweets = append(tweets, tweet)
 	}
 }
 
-func consumer(tweets []*ms.Tweet) {
-	for _, t := range tweets {
+func consumerConc(tweets <-chan *ms.Tweet) {
+	for t := range tweets {
 		if t.IsTalkingAboutGo() {
 			fmt.Println(t.Username, "\ttweets about golang")
 		} else {
@@ -36,19 +36,20 @@ func consumer(tweets []*ms.Tweet) {
 	}
 }
 
-func serial() {
+func concurrent() {
 	start := time.Now()
 	stream := ms.GetMockStream()
 
+	// tweets channel
+	tweets := make(chan *ms.Tweet)
+
 	// Producer
-	tweets := producer(stream)
+	go func() {
+		producerConc(stream, tweets)
+	}()
 
 	// Consumer
-	consumer(tweets)
+	consumerConc(tweets)
 
 	fmt.Printf("Process took %s\n", time.Since(start))
-}
-
-func main() {
-	concurrent()
 }

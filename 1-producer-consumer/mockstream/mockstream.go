@@ -4,19 +4,13 @@
 // Your task is to edit `main.go`
 //
 
-package main
+package mockstream
 
 import (
 	"errors"
 	"strings"
 	"time"
 )
-
-// GetMockStream is a blackbox function which returns a mock stream for
-// demonstration purposes
-func GetMockStream() Stream {
-	return Stream{0, mockdata}
-}
 
 // Stream is a mock stream for demonstration purposes, not threadsafe
 type Stream struct {
@@ -26,6 +20,18 @@ type Stream struct {
 
 // ErrEOF returns on End of File error
 var ErrEOF = errors.New("End of File")
+
+// Tweet defines the simlified representation of a tweet
+type Tweet struct {
+	Username string
+	Text     string
+}
+
+// GetMockStream is a blackbox function which returns a mock stream for
+// demonstration purposes
+func GetMockStream() Stream {
+	return Stream{0, mockdata}
+}
 
 // Next returns the next Tweet in the stream, returns EOF error if
 // there are no more tweets
@@ -41,12 +47,6 @@ func (s *Stream) Next() (*Tweet, error) {
 	s.pos++
 
 	return &tweet, nil
-}
-
-// Tweet defines the simlified representation of a tweet
-type Tweet struct {
-	Username string
-	Text     string
 }
 
 // IsTalkingAboutGo is a mock process which pretend to be a sophisticated procedure to analyse whether tweet is talking about go or not
